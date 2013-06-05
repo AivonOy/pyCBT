@@ -1,0 +1,1 @@
+Python library for fitting CBT data. Copyright Aivon Oy 2013.
