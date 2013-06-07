@@ -1,1 +1,1 @@
-Python library for CBT data fitting.
+Python library for CBT data fitting.  (C) Aivon Oy 2013.
