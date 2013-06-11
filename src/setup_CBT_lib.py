@@ -3,14 +3,9 @@
 Created on Wed May 15 14:54:55 2013
 
 @author: Leif Roschier
+Copyright Aivon Oy (C) 2013
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Wed May 15 14:29:28 2013
-
-@author: Leif Roschier
-"""
 import pyximport
 pyximport.install(setup_args={"script_args":["--compiler=mingw32"]}, reload_support=True)
 from distutils.core import setup
