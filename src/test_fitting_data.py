@@ -3,6 +3,7 @@
 Created on Tue May 14 15:23:46 2013
 
 @author: Leif Roschier
+Copyright Aivon Oy (C) 2013
 """
 
 """
