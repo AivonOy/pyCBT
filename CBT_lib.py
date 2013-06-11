@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+Copyright Aivon Oy (C) 2013
 Created on Wed Feb 23 12:09:04 2011
 
 @author: Leif
