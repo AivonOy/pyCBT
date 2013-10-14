@@ -3,7 +3,10 @@
 Copyright Aivon Oy (C) 2013
 Created on Wed Feb 23 12:09:04 2011
 
-@author: Leif  
+@author: Leif  Roschier
+
+Calculates conductance of two junctions in series. When scaling voltage, 
+can be used to calculate junctions array conductance
 """
 # LRR 23.2.2011
 

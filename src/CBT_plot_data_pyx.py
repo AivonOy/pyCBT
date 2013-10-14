@@ -37,7 +37,44 @@ class CBT_plot_data_pyx:
                    [graph.style.line(lineattrs=[style.linewidth.thick, style.linestyle.solid, 
                                                 color.rgb.red])])
             g.plot(graph.data.values(x=data['V_data'],y=data['G_orig']),
-                   [graph.style.symbol()])
+                   [graph.style.symbol(symbol=graph.style.symbol.circle,size=0.05*unit.v_cm)])
+            #g.plot(graph.data.values(x=data['V_data'],y=data['G_orig']),
+            #       [graph.style.line(lineattrs=[style.linewidth.thin, style.linestyle.dotted, 
+            #                                    color.rgb.blue])])
+        g.dolayout()
+
+        # or provide one list containing the whole points
+        g.writePDFfile(filename)
+
+    def plot_multi_data(self,filename='result.pdf'):
+        #print self.xdata
+        # either provide lists of the individual coordinates
+        datas=[]
+        for i,fitter in enumerate(self.fitters):
+            datas.append({})
+            datas[i]['V_data'] = (array(fitter.original_V())*1e6*fitter.junctions_in_series)
+            datas[i]['G_orig'] = (array(fitter.original_G())*1e6)
+            datas[i]['G_fit'] = (array(fitter.G_curve(fitter.R_T_multi,
+                                 fitter.C_sigma_multi,fitter.T_multi))*1e6)
+            datas[i]['T_fit'] = fitter.T_fit
+            v_min =datas[i]['V_data'].min()
+            v_max =datas[i]['V_data'].max()
+        
+        #print datas
+        
+        g = graph.graphxy(width=8,y=graph.axis.linear(title="$G$ ($\mu$S)"),
+                          x=graph.axis.linear(title="$V$($\mu$V)",
+                                                min=v_min,max=v_max))
+        for data in datas:
+            g.plot(graph.data.values(x=data['V_data'],y=data['G_fit'],
+                                     title="$T_{fit}$ = %g"%data['T_fit']),
+                   [graph.style.line(lineattrs=[style.linewidth.thick, style.linestyle.solid, 
+                                                color.rgb.red])])
+            g.plot(graph.data.values(x=data['V_data'],y=data['G_orig']),
+                   [graph.style.symbol(symbol=graph.style.symbol.circle,size=0.05*unit.v_cm)])
+            #g.plot(graph.data.values(x=data['V_data'],y=data['G_orig']),
+            #       [graph.style.line(lineattrs=[style.linewidth.thin, style.linestyle.dotted, 
+            #                                    color.rgb.blue])])
         g.dolayout()
 
         # or provide one list containing the whole points

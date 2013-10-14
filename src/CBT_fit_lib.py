@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+
+@author: Leif Roschier/Aivon Oy
+
+This class fits single C_sigma, R_T from a given curve.
+"""
 from matplotlib import mlab
 from numpy import *
 import matplotlib
@@ -11,7 +18,7 @@ from copy import *
 import time
 
 N=2.0
-n_max=20
+#n_max=20
 class CBT_fitter():
     """ 
     Class for fitting measured CBT data
@@ -262,6 +269,15 @@ class CBT_fitter():
         #gives original data
         nonlinfit_G = self.peval_1(self.meas_V,self.xopt1[0])
         return nonlinfit_G
+        
+    def G_curve(self,R_T0,C_sigma0,T_0):
+        R_T = R_T0*1e3
+        C_sigma = C_sigma0*1e-15
+        T_p = T_0*1e-3
+        calc_G = calc_conductance_curve_basic(self.sigma,self.N,self.meas_V,R_T,C_sigma,T_p,self.island_size)
+        return calc_G
+        
+        
 
 if __name__ == '__main__': 
     
