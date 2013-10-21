@@ -36,20 +36,34 @@ class CBT_secondary_temp():
         G=[]
         R=[]
         T=[]
-        for t in arange(T_min, T_max+T_step,T_step):
+        T_list_1=arange(5.0e-3,20.0e-3,0.5e-3)
+        T_list_2=arange(21.0e-3,100.0e-3,1.0e-3)
+        T_list_3=arange(100.0e-3,200.0e-3,5e-3)
+        T_list_4=arange(200.0e-3,1.0,50e-3)
+        T_list_5=arange(1.0,10.0,0.5)
+        T_list=concatenate((T_list_1,T_list_2,T_list_3,T_list_4,T_list_5))
+        #for t in arange(T_min, T_max+T_step,T_step):
+        for t in T_list:
             T.append(t)
             #sigma,N,V,R_T,C_sigma,T_p,island_volume, const_P, eps=1e-9
             this_G = (calc_G(sigma,N_series,1e-9,R_T,C_sigma,t,island_vol,
                                 const_P,excitation/N_series))*N_parallel
-            print "T:%g,R.%g"%(t,1.0/this_G)
+            #print "T:%g,R.%g"%(t,1.0/this_G)
             G.append(this_G)
             R.append(1.0/this_G)
+        #z = polyfit(G, T, 20)
+        #p = poly1d(z)
+        #GG = p(T)
         if 0:
              plt.figure(8)
+             #plt.plot(T,G,'ro',T,GG,'b-')
              plt.plot(T,G,'ro')
         R.reverse()
         T.reverse()
-        self.T_func = interpolate.interp1d(array(R), array(T))
+        if 0:
+            plt.figure(18)
+            plt.plot(T,R,'ro')
+        self.T_func = interpolate.interp1d(array(R), array(T),bounds_error=False)
         
 if __name__ == '__main__': 
     C_sigma = 231.033e-15

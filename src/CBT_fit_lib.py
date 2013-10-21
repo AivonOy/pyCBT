@@ -49,6 +49,7 @@ class CBT_fitter():
         self.TEC_init = TEC_init
         self.bounds = bounds
         self.excitation = excitation
+        self.filename=filename
         if not filename==None:
             meas_V0,meas_R = loadtxt(filename, delimiter=None,unpack=True)
         # make chain equal to 2 junctions

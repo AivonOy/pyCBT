@@ -17,14 +17,20 @@ class CBT_plot_data_pyx:
         #print self.xdata
         # either provide lists of the individual coordinates
         datas=[]
+        v_min=0.0
+        v_max=0.0
         for i,fitter in enumerate(self.fitters):
             datas.append({})
             datas[i]['V_data'] = (array(fitter.original_V())*1e6*fitter.junctions_in_series)
             datas[i]['G_orig'] = (array(fitter.original_G())*1e6)
             datas[i]['G_fit'] = (array(fitter.nonlinfit_G())*1e6)
             datas[i]['T_fit'] = fitter.T_fit
-            v_min =datas[i]['V_data'].min()
-            v_max =datas[i]['V_data'].max()
+            v_min_0 =datas[i]['V_data'].min()
+            v_max_0 =datas[i]['V_data'].max()
+            if (v_min_0<v_min): v_min=v_min_0
+            if (v_max_0>v_max): v_max=v_max_0    
+            
+                
         
         #print datas
         
