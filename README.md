@@ -1,7 +1,7 @@
 pyCBT
 =====
 
-Python library for Coulomb Blockade Thermometer (CBT) data fitting. It uses master equation according to *Pekola et. al. PRL*
+Python library for Coulomb Blockade Thermometer (CBT) data fitting. It uses master equation for conductance calculations according to *Pekola et. al. PRL*
 **73** *(1994)*.
 
 ###Requirements
@@ -13,7 +13,7 @@ Python library for Coulomb Blockade Thermometer (CBT) data fitting. It uses mast
 * pyx http://pyx.sourceforge.net/
 
 
-Packages except pyx have installers. For pyx installation, run in shell 
+Packages except pyx have installers. For pyx installation, run pyx installation file ``setup.py`` in shell 
 
 ```
 python setup.py install
@@ -31,6 +31,8 @@ that fits a measured CBT curve.
 ### Cython
 There exist a cython version of file ``CBT_lib.py`` named ``CBT_lib.pyx`` that can be compiled to C-code according instructions
 from [cython webpage](http://cython.org/)
+
+In Windows compiling using mingw at least works. In OSX Xcode, command line tools ahve been tested to work.
 
 
 
