@@ -32,7 +32,7 @@ that fits a measured CBT curve.
 There exist a cython version of file ``CBT_lib.py`` named ``CBT_lib.pyx`` that can be compiled to C-code according instructions
 from [cython webpage](http://cython.org/)
 
-In Windows compiling using mingw at least works. In OSX Xcode, command line tools ahve been tested to work.
+In Windows compiling using mingw at least works. In OSX Xcode, command line tools have been tested to work.
 
 
 
