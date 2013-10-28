@@ -14,7 +14,8 @@ from multiprocessing import Pool,Queue,Value, Process
 class CBT_multi_fitter():
     def __init__(self,fitters,bounds=None,
                  result_text_filename="mfit_results.txt",
-                 multiprocess=False):
+                 multiprocess=False,t_data=None,
+                 interpolation_table_file="mfit_interpolation_table.txt"):
         """
         fitters = list of classes CBT_fitter
         """
@@ -23,8 +24,49 @@ class CBT_multi_fitter():
         self.multiprocess=multiprocess
         self.fit_curves() # do actual fitting
         self.print_results(result_file=result_text_filename)
+        self.built_interpolation_table(t_data=t_data)
+        self.save_interp_table_to_file(interpolation_table_file)
         
+    def built_interpolation_table(self,t_data=None):
+        """
+        builds interpolation curve
+        """
+        G_list=[] # conductances
+        R_list=[] # resistances, inverse of conductances
+        T_list=[] # list of temperatures
+        if t_data==None: # no explicitely given temperatures
+            T_list_1=arange(5.0e-3,20.0e-3,0.5e-3)
+            T_list_2=arange(21.0e-3,100.0e-3,1.0e-3)
+            T_list_3=arange(100.0e-3,200.0e-3,5e-3)
+            T_list=concatenate((T_list_1,T_list_2,T_list_3)).tolist()
+        else:
+            T_list=t_data
+        T_list.reverse() # make resistances to appear ascending
+        fitter=self.fitters[0] # should be at least one, all have same _multi values
+        for t in T_list:
+            #sigma,N,V,R_T,C_sigma,T_p,island_volume, const_P, eps=1e-9
+            #calc_G(fitter.sigma,fitter.N,V,R_T,C_sigma,T_p,fitter.island_size,
+            #                    fitter.const_P,eps=fitter.excitation)
+            this_G = (calc_G(fitter.sigma,fitter.junctions_in_series,1e-9,fitter.R_T_multi*1e3,
+                             fitter.C_sigma_multi*1e-15,t,fitter.island_size,
+                                fitter.const_P,eps=fitter.excitation))*fitter.parallel_arrays
+            print "T:%g,R.%g"%(t,1.0/this_G)
+            G_list.append(this_G)
+            R_list.append(1.0/this_G)
+        self.T_list=T_list
+        self.G_list=G_list
+        self.R_list=R_list
+        # interpolating function
+        self.T_func = interpolate.interp1d(array(R_list), array(T_list),bounds_error=False)
 
+    def save_interp_table_to_file(self,filename="mfit_interpolation_table.txt"):
+        """
+        saves interpolation curve to file
+        """
+        fo = open(filename, "wb")
+        for R,T in zip(self.T_list,self.R_list):
+             fo.write("%g\t%g\n"%(R,T))            
+        fo.close
 
     def fit_curves(self):
         """
