@@ -62,8 +62,8 @@ class CBT_fitter():
         self.meas_V= meas_V0[indices]
         self.meas_R = meas_R[indices]
         self.v_offset = v_offset = 0.0
-        print "Initial v_offset %g"%v_offset
-        print "Const p:%g"%self.const_P
+        #print "Initial v_offset %g"%v_offset
+        #print "Const p:%g"%self.const_P
         self.classic_curve_fitted = False
         self.full_curve_fitted = False        
         self.v_offset =0.0
@@ -85,8 +85,8 @@ class CBT_fitter():
             min_idx=0
         if max_idx>G.size:
             max_idx = G.size
-        print "min_idx:%g"%min_idx
-        print "max_idx:%g"%max_idx
+        #print "min_idx:%g"%min_idx
+        #print "max_idx:%g"%max_idx
         indices = range(min_idx,max_idx+1)
         self.offset_data={}
         self.offset_data['x'] = x = array(self.meas_V[indices])
@@ -103,10 +103,14 @@ class CBT_fitter():
         plots offset calculation
         """
         plt.figure(8)
-        plt.plot( self.offset_data['x']-self.v_offset,self.offset_data['y'],'ro', self.meas_V, self.meas_G,'-x',self.offset_data['x']-self.v_offset,self.offset_data['y2'],'bo')
+        plt.plot( (self.offset_data['x']-self.v_offset)*1e3,self.offset_data['y']*1e6,'ro',
+                 self.meas_V*1e3, self.meas_G*1e6,'-x',
+                 (self.offset_data['x']-self.v_offset)*1e3,self.offset_data['y2']*1e6,'bo')
         #plt.plot( meas_V,peval( meas_V,plsq[0])/plsq[0][0], meas_V, meas_G/plsq[0][0],'--')
-        plt.title('Least-squares fit numerical model')
+        plt.title('Offset corrected curve')
         plt.legend(['Fit range', 'Measurement', 'Fit'])
+        plt.xlabel('voltage (mV)')
+        plt.ylabel(r'conductance ($\mu S$)')
         plt.show()
 
     def print_elapset_time(self):
@@ -159,8 +163,12 @@ class CBT_fitter():
         meas_G = self.meas_G.tolist()
         #plt.plot( self.meas_V,self.peval( self.meas_V,self.plsq[0]),'r', self.meas_V, self.meas_G,'--',self.meas_V,self.peval_1( self.meas_V,self.xopt1[0]),'g--')
         plt.figure(9)        
-        plt.plot( self.meas_V,self.peval( self.meas_V,self.plsq[0]),'r',meas_V, meas_G,'-x')    
-        plt.title('initial fit')
+        plt.plot( self.meas_V*1e3,array(self.peval(self.meas_V,self.plsq[0]))*1e6,'r',
+                 array(meas_V)*1e3, array(meas_G)*1e6,'-x')    
+        plt.title('Fit to analytic curve')
+        plt.xlabel('voltage (mV)')
+        plt.ylabel(r'conductance ($\mu S$)')
+        plt.legend(['Measurement', 'Fit'])
         plt.show()
     
     def plot_all_results(self):
@@ -179,10 +187,13 @@ class CBT_fitter():
         meas_G = self.meas_G.tolist()
         #plt.plot( self.meas_V,self.peval( self.meas_V,self.plsq[0]),'r', self.meas_V, self.meas_G,'--',self.meas_V,self.peval_1( self.meas_V,self.xopt1[0]),'g--')
         plt.figure(11)        
-        plt.plot( meas_V, meas_G,'-x',meas_V,self.peval_1( meas_V,self.xopt1[0]),'g--')
+        plt.plot( array(meas_V)*1e3, array(meas_G)*1e6,'-x',
+                 array(meas_V)*1e3,array(self.peval_1( meas_V,self.xopt1[0]))*1e6,'g--')
         #plt.plot( meas_V,peval( meas_V,plsq[0])/plsq[0][0], meas_V, meas_G/plsq[0][0],'--')
-        plt.title('Least-squares fit numerical model')
+        plt.title('Nonlinear fit results')
         plt.legend([ 'Measurement', 'nonlin fit'],loc=4)
+        plt.xlabel('voltage (mV)')
+        plt.ylabel(r'conductance ($\mu S$)')
         plt.show()        
         
     def plot_start(self,x):

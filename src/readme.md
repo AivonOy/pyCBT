@@ -6,3 +6,4 @@ Files:
 * ``CBT_lib.pyx``: cythonized (for cython) version of ``CBT_lib.py``  
 * ``CBT_plot_data_pyx.py`` : plotting with pyx library (do not mix with .pyx cython files)
 * ``example_fit_and_plot.py``: example script
+* ``example_multi_fit.py``: example script for fitting multiple curves simultaneously to get C_sigma and R_T 
