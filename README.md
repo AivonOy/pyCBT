@@ -4,6 +4,8 @@ pyCBT
 Python library for Coulomb Blockade Thermometer (CBT) data fitting. It uses master equation for conductance calculations according to *Pekola et. al. PRL*
 **73** *(1994)*.
 
+See [tutorial](http://nbviewer.ipython.org/urls/raw.github.com/AivonOy/pyCBT/master/pyNotebooks/pyCBT%2520tutorial.ipynb)
+
 ###Requirements
 
 * Python 2.7.x http://www.python.org/
