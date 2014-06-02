@@ -50,7 +50,7 @@ class CBT_multi_fitter():
             this_G = (calc_G(fitter.sigma,fitter.junctions_in_series,1e-9,fitter.R_T_multi*1e3,
                              fitter.C_sigma_multi*1e-15,t,fitter.island_size,
                                 fitter.const_P,eps=fitter.excitation))*fitter.parallel_arrays
-            print "T:%g,R.%g"%(t,1.0/this_G)
+            #print "T:%g,R.%g"%(t,1.0/this_G)
             G_list.append(this_G)
             R_list.append(1.0/this_G)
         self.T_list=T_list

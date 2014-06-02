@@ -17,14 +17,15 @@ from CBT_lib import *
 from copy import *
 import time
 
-N=2.0
-#n_max=20
+
+N=2
+
 class CBT_fitter():
     """ 
     Class for fitting measured CBT data
     """
     def __init__(self,filename="data/cbt14.txt", T_init=50e-3, island_size_init=1.0,
-                 R_tunnel_init=30,TEC_init=100e-3, n_max=200, N=2.0,
+                 R_tunnel_init=30,TEC_init=100e-3, n_max=200, N=None,
                  sigma=0.2e9,meas_V0=[],meas_R=[],bounds=None,v_offset=0.0,const_P=1e-18,show_first_fit=True,
                 excitation=1e-9,parallel_arrays=20.0, junctions_in_series = 33.0):
         """
@@ -40,7 +41,10 @@ class CBT_fitter():
         self.junctions_in_series= junctions_in_series
         self.sigma =sigma
         self.n_max=n_max
-        self.N=N
+        if N != None:
+            print "N is obsolete"
+        #self.N=N # 23.5.14 LRR
+        self.N=2
         self.v_offset=0.0
         self.const_P=const_P
         self.island_size = island_size_init*1e-15
@@ -53,9 +57,12 @@ class CBT_fitter():
         if not filename==None:
             meas_V0,meas_R = loadtxt(filename, delimiter=None,unpack=True)
         # make chain equal to 2 junctions
-        meas_R = meas_R/(junctions_in_series/2.0)
-        meas_G0=1.0/(meas_R*parallel_arrays) #
-        meas_V0 = meas_V0/(junctions_in_series/2.0)
+        #meas_R = meas_R/(junctions_in_series/2.0) #OLD # 23.05.14   ADM
+        #meas_R = meas_R*parallel_arrays/junctions_in_series # OLD # 26.05.14  ADM
+        meas_R = meas_R*parallel_arrays/junctions_in_series*self.N #NEW # tunnel resistance per each junction
+        #meas_G0=1.0/(meas_R*parallel_arrays) #OLD # 23.05.14   ADM
+        meas_G0=1.0/meas_R #NEW # tunnel conductance per each junction
+        meas_V0 = meas_V0/junctions_in_series*self.N  # potential drop across N junctions
         # remove voltages around zero
         indices = [x for x, y in enumerate(meas_V0) if (y >1e-8 or y<-1e-8)]
         self.meas_G= meas_G0[indices]
@@ -91,11 +98,13 @@ class CBT_fitter():
         self.offset_data={}
         self.offset_data['x'] = x = array(self.meas_V[indices])
         self.offset_data['y'] = y = array(self.meas_G[indices])
-        self.offset_data['z'] = z = polyfit(x, y, 2)
-        self.offset_data['p'] = p = poly1d(z)
+        self.offset_data['z'] = z = polyfit(x, y, 2)   # fit conductance around its minimum with a parabola
+        self.offset_data['p'] = p = poly1d(z)   # build the resulting second degree polynomial 
         self.offset_data['y2'] = p(x)
-        self.v_offset = -z[1]/(2.0*z[0])
-        print "offset:%g"%self.v_offset
+        self.v_offset = -z[1]/(2.0*z[0])   # offset evaluation (position of the minimum of the parabola)
+        print "============================================"     
+        print " Calculated Voltage Offset = %g"%self.v_offset
+        print "============================================"     
         self.meas_V = self.meas_V-self.v_offset
 
     def print_offset_curve(self):
@@ -107,7 +116,7 @@ class CBT_fitter():
                  self.meas_V*1e3, self.meas_G*1e6,'-x',
                  (self.offset_data['x']-self.v_offset)*1e3,self.offset_data['y2']*1e6,'bo')
         #plt.plot( meas_V,peval( meas_V,plsq[0])/plsq[0][0], meas_V, meas_G/plsq[0][0],'--')
-        plt.title('Offset corrected curve')
+        plt.title('Offset Corrected Curve')
         plt.legend(['Fit range', 'Measurement', 'Fit'])
         plt.xlabel('voltage (mV)')
         plt.ylabel(r'conductance ($\mu S$)')
@@ -120,21 +129,32 @@ class CBT_fitter():
     def fit_classic_curve(self):
         # initial values for "classic" curve fit                        
         p0=[1.0/(self.R_tunnel_init),self.T_init,self.TEC_init]
+        print "================================================="     
+        print "==============  Starting Values   ==============="     
+        print "================================================="     
+        print "Rt_init: %g KOhm T_init: %g mK E_C_init: %g mK"%(1.0/p0[0],p0[1]*1e3,p0[2]*1e3)  # 23.05.14  ADM
+        print "================================================="     
         # initial optimization
-        self.plsq=plsq = optimize.fmin_bfgs(self.residuals1, p0, args=(self.meas_G,self.meas_V),
+        self.plsq = optimize.fmin_bfgs(self.residuals1, p0, args=(self.meas_G,self.meas_V),
                                                 gtol=1e-6, full_output=1,maxiter=50,
-                                                callback=self.call_func)          
-        print "==== After initial optimization: ===="     
-        print "R_T = %g kOhm"%(1.0/(plsq[0][0]*self.N))
-        print "T = %g mK"%(plsq[0][1]*1000.0)
-        print "Ec = %g mK"%(plsq[0][2]*(N-1.0)/self.N*1000)
-        print "Csigma = %g fF"%(e**2/(plsq[0][2]*k)*1e15)
+                                                callback=self.call_func)
+        print "========================================="     
+        print "====== After initial optimization: ======"     
+        print "========================================="     
+        #print "R_T = %g kOhm"%(1.0/(plsq[0][0]*self.N))  # OLD # 23.05.14  ADM
+        print "R_T = %g kOhm"%(1.0/(self.plsq[0][0]))  # NEW  # tunnel resistance of the single junction
+        print "R_T_arrays = %g kOhm"%((1.0/self.plsq[0][0])*self.junctions_in_series/self.parallel_arrays)  # NEW # tunnel resistance of the array
+        print "T = %g mK"%(self.plsq[0][1]*1000.0)
+        #print "Ec = %g mK"%(self.plsq[0][2]*(N-1.0)/self.N*1000) # OLD # 28.05.14  ADM
+        print "Ec = %g mK"%(self.plsq[0][2]/2*1000)  # NEW  # charging energy of the single island
+        print "Csigma = %g fF"%(e**2/(self.plsq[0][2]*k)*1e15)
         self.classic_curve_fitted = True
 
     def fit_full_curve(self):
         # main optimization
         if self.classic_curve_fitted==True:
-            R_T_init = (1.0/(self.plsq[0][0]*self.N))
+            #R_T_init = (1.0/(self.plsq[0][0]*self.N))  # OLD  # 23.05.14  ADM
+            R_T_init = (1.0/(self.plsq[0][0]))  # NEW  # tunnel resistance of the single junction
             C_sigma_init=e**2/(self.plsq[0][2]*k)*1e15
             T_p_init = self.plsq[0][1]*1e3
         else:
@@ -149,7 +169,9 @@ class CBT_fitter():
             "Print optimizing with bounds"
             self.xopt1 = optimize.fmin_l_bfgs_b(self.optimize_1, x1, factr=1e7, approx_grad=True, bounds=self.bounds)
         toc = time.clock()
-        print "==== After main optimization: ===="     
+        print "=========================================="     
+        print "======   After main optimization:   ======"  
+        print "=========================================="     # 28.05.14  ADM
         print "R_T = %g"%(self.xopt1[0][0])
         print "T = %g mK"%(self.xopt1[0][2])
         print "C_sigma = %g "%(self.xopt1[0][1])
@@ -168,7 +190,7 @@ class CBT_fitter():
         plt.title('Fit to analytic curve')
         plt.xlabel('voltage (mV)')
         plt.ylabel(r'conductance ($\mu S$)')
-        plt.legend(['Measurement', 'Fit'])
+        plt.legend(['Fit','Measurement'])
         plt.show()
     
     def plot_all_results(self):
@@ -224,20 +246,23 @@ class CBT_fitter():
          return err
      
     def residuals1(self,p, meas_G, meas_V):
-         #N = 2
-        Gt_opt,T_opt,EC_opt = p
-        meas_G = meas_G*1000.0; # make into kOhm
+        #N = 2
+        Gt_opt,T_opt,EC_opt = p[0],p[1],p[2]    # 23.05.14  ADM
+        meas_G = meas_G*1000.0; # make into 1/kOhm
         total_error = 0.0
         for idx,V in enumerate(meas_V):
             #print "idx %g"%idx
-            total_error=total_error + (meas_G[idx]-Gt_opt*(1.0-2*(self.N-1.0)/self.N*EC_opt/T_opt*self.g(e*V/(self.N*k*T_opt))))**2
+            #total_error=total_error + (meas_G[idx]-Gt_opt*(1.0-2*(self.N-1.0)/self.N*EC_opt/T_opt*self.g(e*V/(self.N*k*T_opt))))**2  # OLD  23.05.14  ADM
+            total_error=total_error + (meas_G[idx]-Gt_opt/self.N*(1.0-2*(self.N-1.0)/self.N*EC_opt/T_opt*self.g(e*(V)/(self.N*k*T_opt))))**2
         return total_error*1e5
 
     def peval(self,V, p):
         #N = 2
         Gt_opt,T_opt,EC_opt = p[0],p[1],p[2]
         Gt_opt = Gt_opt/1000.0
-        return Gt_opt*(1.0-2*(self.N-1.0)/self.N*EC_opt/T_opt*self.g(e*(V)/(self.N*k*T_opt)))
+        #return Gt_opt*(1.0-2*(self.N-1.0)/self.N*EC_opt/T_opt*self.g(e*(V)/(self.N*k*T_opt)))  # OLD # 23.05.14  ADM
+        return Gt_opt/self.N*(1.0-2*(self.N-1.0)/self.N*EC_opt/T_opt*self.g(e*(V)/(self.N*k*T_opt)))  # NEW conductance per N junctions
+
     
     def call_func(self,x): 
         print x
@@ -258,7 +283,7 @@ class CBT_fitter():
             G.append(calc_G(self.sigma,self.N,V,R_T,C_sigma,T_p,self.island_size,
                             self.const_P,eps=self.excitation))
         res = sum((array(self.meas_G)-array(G))**2)*1e10
-        print "Rt:%g Csigma:%g Tp:%g res:%g"%(R_T,C_sigma,T_p,res)
+        print "Rt: %g Csigma: %g Tp: %g res: %g"%(R_T,C_sigma,T_p,res)
         return res
 
     def peval_1(self,meas_V,x):
