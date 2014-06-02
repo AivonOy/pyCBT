@@ -8,7 +8,14 @@ See
 
 * [Tutorial](http://nbviewer.ipython.org/urls/raw.github.com/AivonOy/pyCBT/master/pyNotebooks/pyCBT%2520tutorial.ipynb)
 
+* [Multifit quickstart](http://nbviewer.ipython.org/urls/raw.github.com/AivonOy/pyCBT/master/pyNotebooks/pyCBT%2520multifit%2520quickstart.ipynb)
+
+
+* [Multifit with explanations](http://nbviewer.ipython.org/urls/raw.github.com/AivonOy/pyCBT/master/pyNotebooks/pyCBT%2520MultiFit%2520tutorial.ipynb)
+
 * [Capability calculations](http://nbviewer.ipython.org/github/AivonOy/pyCBT/blob/master/pyNotebooks/On%20CBT%20measurement.ipynb?create=1)
+
+
 
 ###Requirements
 
