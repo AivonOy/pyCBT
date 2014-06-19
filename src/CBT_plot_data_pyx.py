@@ -74,13 +74,15 @@ class CBT_plot_data_pyx:
         #plot datas        
         g = graph.graphxy(width=8,y=graph.axis.linear(title="$G$ ($\mu$S)"),
                           x=graph.axis.linear(title="$V$($\mu$V)",
-                                                min=v_min,max=v_max))
+                                                min=v_min,max=v_max),
+                                                key=graph.key.key(pos="tr", dist=0.1))
         for data in datas:
             g.plot(graph.data.values(x=data['V_data'],y=data['G_fit'],
-                                     title="$T_{fit}$ = %g"%data['T_fit']),
+                               title="$T_{fit}$ = %3.1f"%data['T_fit']),
                    [graph.style.line(lineattrs=[style.linewidth.thick, style.linestyle.solid, 
                                                 color.rgb.red])])
-            g.plot(graph.data.values(x=data['V_data'],y=data['G_orig']),
+            g.plot(graph.data.values(x=data['V_data'],y=data['G_orig'],
+                                     title="meas data"),
                    [graph.style.symbol(symbol=graph.style.symbol.circle,size=0.05*unit.v_cm)])
             #g.plot(graph.data.values(x=data['V_data'],y=data['G_orig']),
             #       [graph.style.line(lineattrs=[style.linewidth.thin, style.linestyle.dotted, 
